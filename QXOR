@@ -1,0 +1,87 @@
+//Cho một dãy số nguyên gồm N phần tử A(1), A(2), ..., A(N) Q truy vấn. Mỗi truy vấn có một trong 2 dạng sau:
+//
+//Dạng 1 i x: Thao tác này sẽ thay đổi giá trị phần tử A(i) thành A(i) = A(i) ^ x
+//Dạng 2 l r: Thao tác này sẽ in ra màn hình giá trị A(l) ^ A(l+1) ^ A(l+2) ^ .... ^ A(r-1) ^ A(r)
+//Với phép ^ là phép xor trong các phép toán thao tác bit trong các ngôn ngữ lập trình.
+//
+//Yêu cầu với mỗi truy vấn dạng 2 in ra kết quả trên 1 dòng riêng biệt.
+
+// test case
+//3 4
+//1 2 3
+//2 1 3
+//2 2 3
+//1 2 3
+//2 2 3
+//
+
+#include <bits/stdc++.h>
+
+using namespace std;
+struct Node{int Xor; int lazy;};
+
+vector<Node> st;
+vector<int> a;
+
+
+void build(int id, int l,int r)
+{
+
+        if (l == r) {st[id] = {a[l],0}; return;}
+        int mid = (l+r) / 2;
+
+        build(id*2, l, mid);
+        build(id*2+1, mid+1, r);
+
+        st[id].Xor = st[id*2].Xor^st[id*2+1].Xor;
+}
+int getXor(int id, int l,int r,int u,int v)
+{
+
+        if(l>=u && r<=v){ return st[id].Xor; }
+        else if (r<u || l>v) return 0;
+
+        int mid =(l+r) / 2;
+
+        int ans = (getXor(id*2,l,mid,u,v)^getXor(id*2+1,mid+1,r,u,v));
+
+        return ans;
+}
+void update(int id, int l, int r, int i, int x)
+{
+
+        if (i < l || i > r) return;
+        if (l == r)
+        {
+            a[l] = a[l]^x;
+            st[id] = {a[l], 0};
+            return;
+        }
+        int mid = (l + r) / 2;
+        update(2 * id, l, mid, i, x);
+        update(2 * id + 1, mid + 1, r, i, x);
+        st[id].Xor = st[id*2].Xor^st[id*2+1].Xor;
+
+}
+
+int main()
+{
+        int n,q; cin>>n>>q; // nhap n va so truy van
+        a.resize(n+1);
+        st.resize(n*4);
+
+        for(int i = 1;i<=n;i++) cin>>a[i];
+        build(1,1,n); // xay cay
+        while(q--)
+        {
+               int l,r,v,x,ch; cin>>ch>>l>>r;
+               switch (ch)
+               {
+                   case 1: {update(1,1,n,l,r);} break;
+                   case 2: {cout<<getXor(1,1,n,l,r)<<endl;} break;
+               }
+        }
+
+
+return 0;
+}
